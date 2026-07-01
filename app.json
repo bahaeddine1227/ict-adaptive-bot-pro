@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "ICT Adaptive Bot Pro",
+    "slug": "ict-adaptive-bot-pro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0A0A0A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0A0A"
+      },
+      "package": "com.ictadaptive.botpro",
+      "versionCode": 1,
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "favicon": "./assets/favicon.png",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "ICT Adaptive Bot Pro needs access to your photos so you can attach trade screenshots."
+        }
+      ]
+    ]
+  }
+}
