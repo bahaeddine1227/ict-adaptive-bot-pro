@@ -34,60 +34,25 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
-      - name: Build Debug APK (installable, works out of the box)
+      - name: Build Release APK (bundled + signed, installable standalone)
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Upload Release APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ICT-Adaptive-Bot-Pro-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Build Debug APK (dev-only, needs Metro server)
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
+        continue-on-error: true
 
       - name: Upload Debug APK artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: ICT-Adaptive-Bot-Pro-debug-apk
+          name: ICT-Adaptive-Bot-Pro-debug-apk-DEV-ONLY
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Build Release APK (unsigned)
-        working-directory: android
-        run: ./gradlew assembleRelease --no-daemon
-        continue-on-error: true
-
-      - name: Generate a signing key for this build
-        if: always()
-        run: |
-          mkdir -p signing
-          keytool -genkeypair -v \
-            -keystore signing/release.keystore \
-            -alias ictadaptivebotpro \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass ictadaptive123 -keypass ictadaptive123 \
-            -dname "CN=ICT Adaptive Bot Pro, OU=Trading Tools, O=Self-Published, L=NA, S=NA, C=US"
-        continue-on-error: true
-
-      - name: Sign the Release APK
-        if: always()
-        run: |
-          ANDROID_SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
-          BUILD_TOOLS_DIR=$(ls -d "$ANDROID_SDK"/build-tools/*/ | sort -V | tail -n 1)
-          UNSIGNED_APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
-          ALIGNED_APK="android/app/build/outputs/apk/release/app-release-aligned.apk"
-          SIGNED_APK="android/app/build/outputs/apk/release/app-release-signed.apk"
-
-          if [ -f "$UNSIGNED_APK" ]; then
-            "$BUILD_TOOLS_DIR/zipalign" -f -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
-            "$BUILD_TOOLS_DIR/apksigner" sign \
-              --ks signing/release.keystore \
-              --ks-pass pass:ictadaptive123 \
-              --key-pass pass:ictadaptive123 \
-              --out "$SIGNED_APK" \
-              "$ALIGNED_APK"
-            echo "Signed release APK created at $SIGNED_APK"
-          else
-            echo "No unsigned release APK found — skipping signing step."
-          fi
-        continue-on-error: true
-
-      - name: Upload Signed Release APK artifact (ready to install)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ICT-Adaptive-Bot-Pro-release-signed-apk
-          path: android/app/build/outputs/apk/release/app-release-signed.apk
           if-no-files-found: ignore
